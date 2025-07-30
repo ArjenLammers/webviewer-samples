@@ -27,6 +27,7 @@ export interface WebViewerContainerProps {
     enableMeasurement: boolean;
     enableRedaction: boolean;
     selectAnnotationOnCreation: boolean;
+    openNotesPanel: boolean;
     xfdfAttribute?: EditableValue<string>;
     enableXfdfExportButton: boolean;
     enableAutoXfdfExport: boolean;
@@ -75,6 +76,7 @@ export interface WebViewerPreviewProps {
     enableMeasurement: boolean;
     enableRedaction: boolean;
     selectAnnotationOnCreation: boolean;
+    openNotesPanel: boolean;
     xfdfAttribute: string;
     onExportXfdf: {} | null;
     enableXfdfExportButton: boolean;

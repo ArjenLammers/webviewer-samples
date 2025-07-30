@@ -80,6 +80,10 @@
                     <caption>Select on creation</caption>
                     <description>Automatically select annotations when they are created.</description>
                 </property>
+                <property key="openNotesPanel" type="boolean" defaultValue="false">
+                    <caption>Open notes panel</caption>
+                    <description>Automatically open the notes panel when an annotation user is set.</description>
+                </property>
             </propertyGroup>
             <propertyGroup caption="XFDF">
                 <property key="xfdfAttribute" type="attribute" required="false" onChange="onExportXfdf">

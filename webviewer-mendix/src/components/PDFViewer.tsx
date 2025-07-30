@@ -40,6 +40,7 @@ export interface InputProps {
     enableSaveAsButton?: boolean;
     enableRealTimeAnnotating?: boolean;
     autoXfdfCommandImportInterval?: number;
+    openNotesPanel?: boolean;
 }
 
 const hasAttribute = (attribute: any): boolean => attribute && attribute.status === "available";
@@ -248,19 +249,16 @@ const PDFViewer: React.FC<InputProps> = props => {
                 );
             }
             if (props.enableAutoXfdfExport) {
-                if (wvUIEventHandlers.current.debouncedXfdfUpdate) {
+                if (wvUIEventHandlers.current.autoXfdfExportListener) {
                     Core.annotationManager.removeEventListener(
                         "annotationChanged",
-                        wvUIEventHandlers.current.debouncedXfdfUpdate
+                        wvUIEventHandlers.current.autoXfdfExportListener
                     );
                 }
-                wvUIEventHandlers.current.debouncedXfdfUpdate = debounce(
-                    wvUIEventHandlers.current.updateXfdfAttribute,
-                    1000
-                );
+                wvUIEventHandlers.current.autoXfdfExportListener = wvUIEventHandlers.current.updateXfdfAttribute;
                 Core.annotationManager.addEventListener(
                     "annotationChanged",
-                    wvUIEventHandlers.current.debouncedXfdfUpdate
+                    wvUIEventHandlers.current.autoXfdfExportListener
                 );
             }
 
@@ -268,6 +266,10 @@ const PDFViewer: React.FC<InputProps> = props => {
                 // Only auto import when we are loading from a file entity
                 console.log("Retrieving XFDF for document");
                 if (props.enableAutoXfdfImport && hasAttribute(props.xfdfAttribute)) {
+                    // Only open notes panel if the option is enabled
+                    if (props.openNotesPanel) {
+                        UI.openElements(["notesPanel"]);
+                    }
                     return props.xfdfAttribute.value;
                 }
             });
@@ -300,8 +302,7 @@ const PDFViewer: React.FC<InputProps> = props => {
                 selectAnnotationOnCreation: props.selectAnnotationOnCreation,
                 fullAPI: props.enableFullAPI,
                 css: props.customCss,
-                licenseKey: props.l,
-                disableLogs: true
+                licenseKey: props.l
             },
             viewerRef.current as HTMLDivElement
         ).then((instance: WebViewerInstance) => {
@@ -465,6 +466,7 @@ const PDFViewer: React.FC<InputProps> = props => {
         if (wvInstance && props.annotationUser) {
             wvInstance.Core.annotationManager.setCurrentUser(props.annotationUser);
         }
+        
     }, [wvInstance, props.annotationUser]);
 
     return (
