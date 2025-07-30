@@ -62,6 +62,11 @@ const PDFViewer: React.FC<InputProps> = props => {
     const moduleClient = moduleClientRef.current;
 
     const swapFileIds = (nextFileId: string | null | undefined = null): void => {
+        console.log("Swapping file IDs", {
+            previousFileId: previousFileIdRef.current,
+            currentFileId: currentFileIdRef.current,
+            nextFileId
+        });
         previousFileIdRef.current = currentFileIdRef.current;
         currentFileIdRef.current = nextFileId;
     };
@@ -416,12 +421,14 @@ const PDFViewer: React.FC<InputProps> = props => {
             });
 
             Core.documentViewer.addEventListener("documentLoaded", () => {
+                console.log("Document loaded");
                 isDocumentLoadedRef.current = true;
             });
 
             Core.documentViewer.addEventListener("documentUnloaded", () => {
+                console.log("Document unloaded");
                 isDocumentLoadedRef.current = false;
-                swapFileIds();
+                // swapFileIds();
             });
         });
     }, [viewer]);
