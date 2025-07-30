@@ -186,6 +186,12 @@ const PDFViewer: React.FC<InputProps> = props => {
                 if (!currentFileIdRef.current) {
                     return;
                 }
+                
+                // Skip export if annotations are being imported
+                if (_info && _info.imported === true) {
+                    return;
+                }
+                
                 const xfdfString = await exportAnnotations();
                 // Update Mendix XFDF Attribute
                 props.xfdfAttribute.setValue(xfdfString);
@@ -262,17 +268,7 @@ const PDFViewer: React.FC<InputProps> = props => {
                 );
             }
 
-            Core.documentViewer.setDocumentXFDFRetriever(async () => {
-                // Only auto import when we are loading from a file entity
-                console.log("Retrieving XFDF for document");
-                if (props.enableAutoXfdfImport && hasAttribute(props.xfdfAttribute)) {
-                    // Only open notes panel if the option is enabled
-                    if (props.openNotesPanel) {
-                        UI.openElements(["notesPanel"]);
-                    }
-                    return props.xfdfAttribute.value;
-                }
-            });
+            
         }
     }, [
         wvInstance,
@@ -447,6 +443,17 @@ const PDFViewer: React.FC<InputProps> = props => {
                 // Only reload document if the GUID has changed
                 if (newGuid !== currentFileIdRef.current) {
                     swapFileIds(newGuid);
+                    wvInstance.Core.documentViewer.setDocumentXFDFRetriever(async () => {
+                        // Only auto import when we are loading from a file entity
+                        console.log("Retrieving XFDF for document");
+                        if (props.enableAutoXfdfImport && hasAttribute(props.xfdfAttribute)) {
+                            // Only open notes panel if the option is enabled
+                            if (props.openNotesPanel) {
+                                wvInstance.UI.openElements(["notesPanel"]);
+                            }
+                            return props.xfdfAttribute.value;
+                        }
+                    });
                     wvInstance.UI.loadDocument(props.file.value.uri, {
                         filename: props.file.value.name,
                         enableOfficeEditing: props.enableOfficeEditing
@@ -459,7 +466,7 @@ const PDFViewer: React.FC<InputProps> = props => {
             }
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [wvInstance, props.fileUrl, props.file]); // Ignore file URL attribute or it will cause the file to reload
+    }, [wvInstance, props.fileUrl, props.file, props.xfdfAttribute]); // Ignore file URL attribute or it will cause the file to reload
 
     useEffect(() => {
         // Setting the annotation user in WV
