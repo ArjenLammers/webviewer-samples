@@ -266,6 +266,7 @@ const PDFViewer: React.FC<InputProps> = props => {
 
             Core.documentViewer.setDocumentXFDFRetriever(async () => {
                 // Only auto import when we are loading from a file entity
+                console.log("Retrieving XFDF for document");
                 if (props.enableAutoXfdfImport && hasAttribute(props.xfdfAttribute)) {
                     return props.xfdfAttribute.value;
                 }
@@ -299,7 +300,8 @@ const PDFViewer: React.FC<InputProps> = props => {
                 selectAnnotationOnCreation: props.selectAnnotationOnCreation,
                 fullAPI: props.enableFullAPI,
                 css: props.customCss,
-                licenseKey: props.l
+                licenseKey: props.l,
+                disableLogs: true
             },
             viewerRef.current as HTMLDivElement
         ).then((instance: WebViewerInstance) => {
@@ -439,12 +441,18 @@ const PDFViewer: React.FC<InputProps> = props => {
         if (wvInstance) {
             if (hasAttribute(props.file)) {
                 const url = new URLSearchParams(props.file.value.uri.split("?")[1]);
-                swapFileIds(url.get("guid"));
-                wvInstance.UI.loadDocument(props.file.value.uri, {
-                    filename: props.file.value.name,
-                    enableOfficeEditing: props.enableOfficeEditing
-                });
+                const newGuid = url.get("guid");
+                
+                // Only reload document if the GUID has changed
+                if (newGuid !== currentFileIdRef.current) {
+                    swapFileIds(newGuid);
+                    wvInstance.UI.loadDocument(props.file.value.uri, {
+                        filename: props.file.value.name,
+                        enableOfficeEditing: props.enableOfficeEditing
+                    });
+                }
             } else if (props.fileUrl) {
+                // For plain URL, we don't have a GUID to compare, so reload
                 swapFileIds();
                 wvInstance.UI.loadDocument(props.fileUrl, { enableOfficeEditing: props.enableOfficeEditing });
             }
