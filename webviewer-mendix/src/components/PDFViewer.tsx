@@ -258,11 +258,19 @@ const PDFViewer: React.FC<InputProps> = props => {
                     wvUIEventHandlers.current.debouncedXfdfUpdate
                 );
             }
+
+            Core.documentViewer.setDocumentXFDFRetriever(async () => {
+                // Only auto import when we are loading from a file entity
+                if (props.enableAutoXfdfImport && hasAttribute(props.xfdfAttribute)) {
+                    return props.xfdfAttribute.value;
+                }
+            });
         }
     }, [
         wvInstance,
         moduleClient,
         props.enableAutoXfdfExport,
+        props.enableAutoXfdfImport,
         props.xfdfAttribute,
         props.enableRealTimeAnnotating,
         props.autoXfdfCommandImportInterval
@@ -415,13 +423,6 @@ const PDFViewer: React.FC<InputProps> = props => {
                 isDocumentLoadedRef.current = false;
                 swapFileIds();
             });
-
-            Core.documentViewer.setDocumentXFDFRetriever(async () => {
-                // Only auto import when we are loading from a file entity
-                if (currentFileIdRef.current && props.enableAutoXfdfImport && hasAttribute(props.xfdfAttribute)) {
-                    return props.xfdfAttribute.value;
-                }
-            });
         });
     }, [viewer]);
 
@@ -442,7 +443,7 @@ const PDFViewer: React.FC<InputProps> = props => {
             }
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [wvInstance, props.fileUrl]); // Ignore file URL attribute or it will cause the file to reload
+    }, [wvInstance, props.fileUrl, props.file]); // Ignore file URL attribute or it will cause the file to reload
 
     useEffect(() => {
         // Setting the annotation user in WV
